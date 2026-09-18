@@ -5,6 +5,7 @@ Unified database bridge linking existing system components directly to ak_databa
 
 from ak_database import (
     DATABASE_NAME,
+    TrustResult,
     get_connection,
     setup_database,
     is_blacklisted,
@@ -17,11 +18,13 @@ from ak_database import (
     fetch_recent_logs,
     check_usb_trust,
     log_event,
-    get_latest_logs
+    get_latest_logs,
+    DEFAULT_KNOWN_DEVICES
 )
 
 __all__ = [
     "DATABASE_NAME",
+    "TrustResult",
     "get_connection",
     "setup_database",
     "is_blacklisted",
@@ -34,7 +37,8 @@ __all__ = [
     "fetch_recent_logs",
     "check_usb_trust",
     "log_event",
-    "get_latest_logs"
+    "get_latest_logs",
+    "DEFAULT_KNOWN_DEVICES"
 ]
 
 if __name__ == "__main__":

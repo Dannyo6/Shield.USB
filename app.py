@@ -5,18 +5,26 @@ Provides strict CORS-enabled endpoints for SOC dashboard telemetry and hardware 
 """
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 import ak_database
 import db
+import db_manager
 import telemetry_engine
 import containment_engine
 
 app = Flask(__name__)
-# Enable CORS for frontend dashboard access
-CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Enforce robust CORS for frontend dashboard access
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173", "*"],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Ensure the database and threat signatures are initialized at startup
 ak_database.setup_database()
@@ -30,15 +38,16 @@ START_TIME = time.time()
 def health():
     """
     Production health probe verifying API gateway and database readiness.
+    Returns: { "status": "armed", "service": "shield-usb-vault" }
     """
     uptime_seconds = int(time.time() - START_TIME)
     return jsonify({
-        "status": "healthy",
-        "service": "Shield.USB Pro Telemetry Gateway",
+        "status": "armed",
+        "service": "shield-usb-vault",
         "version": "1.0.0",
         "uptime_seconds": uptime_seconds,
         "database": "WAL_ENABLED",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }), 200
 
 
@@ -48,16 +57,18 @@ def health():
 def get_logs():
     """
     Dynamic log polling endpoint supporting query limit parameter.
+    Returns the latest 50 logs as structured JSON dictionaries; handles empty database states gracefully.
     Example: GET /api/logs?limit=50
     """
     try:
         limit_param = request.args.get("limit", default=50, type=int)
-        # Cap limit to prevent memory exhaustion
         limit = max(1, min(limit_param, 500))
         logs = ak_database.get_latest_logs(limit=limit)
+        if logs is None:
+            logs = []
         return jsonify(logs), 200
     except Exception as e:
-        return jsonify({"error": "Failed to fetch logs", "details": str(e)}), 500
+        return jsonify({"error": "Failed to fetch logs", "details": str(e), "logs": []}), 500
 
 
 # ── Hardware Verification & Policy Enforcement ────────────────────────────────
@@ -71,14 +82,20 @@ def verify_device():
     """
     try:
         data = request.get_json(silent=True)
-        if not data:
+        if not data or not isinstance(data, dict):
             return jsonify({
                 "error": "Bad Request",
                 "message": "Missing or invalid JSON body. Expected 'vid' and 'pid'."
             }), 400
 
-        vid = str(data.get("vid", "")).strip().upper()
-        pid = str(data.get("pid", "")).strip().upper()
+        raw_vid = str(data.get("vid", "")).strip()
+        raw_pid = str(data.get("pid", "")).strip()
+        if raw_vid.upper().startswith("0X"):
+            raw_vid = raw_vid[2:]
+        if raw_pid.upper().startswith("0X"):
+            raw_pid = raw_pid[2:]
+        vid = raw_vid.strip().upper()
+        pid = raw_pid.strip().upper()
 
         if not vid or not pid:
             return jsonify({
@@ -108,6 +125,12 @@ def verify_device():
             containment_status = "QUARANTINED"
 
         # Log event to database
+        raw_cps = data.get("cps", 0.0)
+        try:
+            cps_val = float(raw_cps)
+        except (ValueError, TypeError):
+            cps_val = 0.0
+
         log_id = ak_database.log_event(
             vid=vid,
             pid=pid,
@@ -115,13 +138,13 @@ def verify_device():
             device_name=device_name,
             device_class=device_class,
             risk_score=risk_score,
-            cps=float(data.get("cps", 0.0)),
+            cps=cps_val,
             containment_status=containment_status
         )
 
         response_payload = {
             "log_id": log_id,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "vid": vid,
             "pid": pid,
             "device_name": device_name,

@@ -36,16 +36,23 @@ ENV/
 env.bak/
 venv.bak/
 
+# Testing & cache artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
 # SQLite & Local Databases
 *.db
 *.db-wal
 *.db-shm
+*.db-journal
 *.sqlite3
 usb_vault.db
 shield_usb.db
 
 # Frontend dependencies & production builds
 node_modules/
+.vite/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

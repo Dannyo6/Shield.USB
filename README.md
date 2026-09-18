@@ -302,7 +302,7 @@ Content-Type: application/json
 
 ---
 
-## 🎓 Context & Acknowledgments
+## 🎓 Context & Academic Metadata
 
 This research and engineering implementation was developed under the following academic initiative:
 
@@ -314,9 +314,11 @@ This research and engineering implementation was developed under the following a
 - **Project Title**:  
   *Shield.USB Pro: Zero-Trust USB Hardware Intercept & Behavioral Keystroke Velocity Telemetry System*
 - **Role & Authorship**:  
-  Contributor, System Architect & Co-developer: **Dhanush V** ([@Dannyo6](https://github.com/Dannyo6)).
+  System Architect & Lead Developer: **Dhanush V** ([@Dannyo6](https://github.com/Dannyo6)).
+- **Faculty Guide & Institutional Mentorship**:  
+  Faculty Mentors, Laboratory Coordinators & Project Review Committee, Department of Computer Science & Engineering, RNSIT Bengaluru.
 
-Special thanks to the faculty, mentors, and laboratory coordinators at RNSIT CSE for providing the embedded systems instrumentation and research facilities.
+Special thanks to the Department of CSE and the Centre for Cybersecurity Studies at RNSIT for providing the embedded systems instrumentation, microcontroller hardware harnesses, and laboratory facilities.
 
 ---
 

@@ -125,40 +125,62 @@ def get_initial_action(device_info: dict) -> dict:
 
 # ── Live HID Evaluation (called by HIDWatcher every tick) ────────────────────
 
-def evaluate_live_hid(device_info: dict, telemetry_snapshot: dict) -> dict:
+def evaluate_live_hid(*args, **kwargs) -> dict:
     """
-    FIX #3: Bug fix — original code used `if cps >= 0` which blocked
-    every single keystroke, including 0.0 at device insertion.
-    Corrected to use CPS_BLOCK_THRESHOLD (20 CPS).
+    Evaluates live HID telemetry for high-velocity injection or bot cadence.
+    Accepts both:
+      evaluate_live_hid(device_info, telemetry_snapshot)
+    and
+      evaluate_live_hid(cps=..., anomaly_score=..., variance_ok=..., current_risk_score=..., device_info=...)
+    """
+    device_info = kwargs.get("device_info")
+    telemetry_snapshot = kwargs.get("telemetry_snapshot")
 
-    Also checks anomaly_score independently so bot-like variance
-    triggers containment even at moderate CPS.
-    """
-    vid          = device_info["vid"].upper()
-    pid          = device_info["pid"].upper()
+    if args:
+        if len(args) >= 1 and isinstance(args[0], dict) and "vid" in args[0]:
+            device_info = args[0]
+        if len(args) >= 2 and isinstance(args[1], dict):
+            telemetry_snapshot = args[1]
+
+    if not device_info:
+        device_info = {
+            "vid": kwargs.get("vid", "UNKNOWN"),
+            "pid": kwargs.get("pid", "UNKNOWN"),
+            "device_class": kwargs.get("device_class", "HID"),
+            "device_name": kwargs.get("device_name", "USB HID Device")
+        }
+
+    vid = str(device_info.get("vid", "")).upper()
+    pid = str(device_info.get("pid", "")).upper()
     trust_status = db.check_device_trust(vid, pid)
 
-    cps           = telemetry_snapshot["cps_short"]
-    anomaly_score = telemetry_snapshot["anomaly_score"]
-    classification = telemetry_snapshot["classification"]
-    threat_detected = telemetry_snapshot.get("threat_detected", False)
+    # Extract CPS, anomaly score, and threat indicators
+    if telemetry_snapshot:
+        cps = float(telemetry_snapshot.get("cps_short", 0.0))
+        anomaly_score = int(telemetry_snapshot.get("anomaly_score", 0))
+        classification = telemetry_snapshot.get("classification", "HUMAN")
+        threat_detected = bool(telemetry_snapshot.get("threat_detected", False))
+    else:
+        cps = float(kwargs.get("cps", 0.0))
+        anomaly_score = int(kwargs.get("anomaly_score", 0))
+        classification = "BADUSB" if cps >= CPS_BLOCK_THRESHOLD else "HUMAN"
+        threat_detected = cps >= CPS_BLOCK_THRESHOLD or not kwargs.get("variance_ok", True)
 
     normalized_class = "HID" if device_info.get("device_class") == "HID_RISK" else device_info.get("device_class", "HID")
-    final_score  = calculate_risk_score(trust_status, normalized_class, anomaly_score)
+    final_score = calculate_risk_score(trust_status, normalized_class, anomaly_score)
     action_taken = determine_action(final_score)
 
-    # FIX #3: Correct threshold — was `cps >= 0` (always True)
     if cps >= CPS_BLOCK_THRESHOLD or threat_detected:
         action_taken = "BLOCKED"
-        final_score  = max(final_score, 85)
+        final_score = max(final_score, 85)
 
     return {
-        "should_block":    action_taken == "BLOCKED",
-        "action_taken":    action_taken,
+        "should_block": action_taken == "BLOCKED",
+        "action_taken": action_taken,
         "final_risk_score": final_score,
-        "cps":             cps,
-        "classification":  classification,
-        "anomaly_score":   anomaly_score
+        "cps": cps,
+        "classification": classification,
+        "anomaly_score": anomaly_score
     }
 
 

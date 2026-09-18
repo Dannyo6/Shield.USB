@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ Shield.USB Pro
+# 🛡️ Shield.USB
 
 ### **Zero-Trust USB Hardware Intercept & Behavioral Keystroke Velocity Telemetry System**
 
@@ -11,7 +11,7 @@
 [![SQLite WAL](https://img.shields.io/badge/Storage-SQLite_WAL-003B57.svg?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
 [![RNSIT CSE Silver Jubilee](https://img.shields.io/badge/RNSIT%20CSE-Silver%20Jubilee-8A2BE2.svg)](#context--acknowledgments)
 
-**Shield.USB Pro** is an enterprise-grade, interdisciplinary cybersecurity platform engineered to neutralize malicious USB Human Interface Devices (HID / BadUSB) such as Raspberry Pi Pico (RP2040), Teensy, and Hak5 Rubber Ducky before malicious keystroke sequences can execute.
+**Shield.USB ** is an enterprise-grade, interdisciplinary cybersecurity platform engineered to neutralize malicious USB Human Interface Devices (HID / BadUSB) such as Raspberry Pi Pico (RP2040), Teensy, and Hak5 Rubber Ducky before malicious keystroke sequences can execute.
 
 </div>
 

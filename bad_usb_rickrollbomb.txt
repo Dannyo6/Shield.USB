@@ -1,0 +1,36 @@
+import time
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
+
+# ==========================================
+# ⚙️ THE CLEAN BOMB CONFIGURATION
+# ==========================================
+# This link is specifically tagged as {HD + No ads}
+YOUTUBE_LINK = "https://youtu.be/QDia3e12czc?autoplay=1"
+NUMBER_OF_TABS = 3
+BYPASS_DELAY = 12
+# ==========================================
+
+time.sleep(1.5) 
+kbd = Keyboard(usb_hid.devices)
+layout = KeyboardLayoutUS(kbd)
+
+# 1. Open Run menu
+kbd.send(Keycode.GUI, Keycode.R)
+time.sleep(0.5)
+
+# 2. Blast the ad-free link loop
+payload = f'cmd /c "for /l %x in (1,1,{NUMBER_OF_TABS}) do start {YOUTUBE_LINK}"\n'
+layout.write(payload)
+
+# 3. Wait for the tabs to load
+time.sleep(BYPASS_DELAY)
+
+# 4. The Multi-Tab Playback Loop
+for _ in range(NUMBER_OF_TABS):
+    kbd.send(Keycode.K) # Play
+    time.sleep(0.5)
+    kbd.send(Keycode.CONTROL, Keycode.TAB) # Switch tab
+    time.sleep(2) # Wake up the background tab

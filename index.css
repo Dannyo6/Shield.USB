@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   SHIELD.USB — Global Styles
+   ========================================================= */
+
+body {
+  background-color: #0a0a0f;
+  margin: 0;
+  color: #cbd5e1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb { background: #262633; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a50; }
+
+/* ── Traffic stream marquee ─────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.34%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 18s linear infinite;
+}
+
+/* Faster scroll on threat */
+.threat-marquee .animate-marquee {
+  animation-duration: 4s;
+}
+
+/* Legacy scroll-left (kept for compatibility) */
+@keyframes scroll-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.33%); }
+}
+
+.animate-scroll-left {
+  display: inline-block;
+  white-space: nowrap;
+  animation: scroll-left 15s linear infinite;
+}
+
+/* ── Threat alert pulse ──────────────────────────────────── */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+
+/* ── Glow effects ────────────────────────────────────────── */
+.glow-red {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2),
+              0 0 40px rgba(239, 68, 68, 0.08);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15),
+              0 0 40px rgba(99, 102, 241, 0.06);
+}

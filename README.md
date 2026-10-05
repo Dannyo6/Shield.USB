@@ -44,12 +44,24 @@ Because Shield.USB interacts directly with hardware APIs, the backend **must be 
 ### 1. Boot the Security Backend
 ```bash
 # Clone the repository
-git clone [https://github.com/Dannyo6/Shield.USB.git](https://github.com/Dannyo6/Shield.USB.git)
+git clone https://github.com/Dannyo6/Shield.USB.git
 cd Shield.USB
 
-# Install hardware & server dependencies
+# Navigate to backend and install dependencies
+cd backend
 pip install -r requirements.txt
 
 # Start the Flask API with elevated privileges (Required for USB interception)
 sudo python app.py
 ```
+
+### 2. Boot the Frontend Command Center
+```bash
+# Navigate to frontend and install dependencies
+cd frontend
+npm install
+
+# Start the Vite development server
+npm run dev
+```
+
